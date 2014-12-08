@@ -27,7 +27,8 @@
   *
 ###
 $ ->
-  if namespace.controller is "visualizations" and namespace.action in ["displayVis", "embedVis", "show"]
+  if namespace.controller is "visualizations" and
+  namespace.action in ["displayVis", "embedVis", "show"]
 
     window.globals ?= {}
 
@@ -37,16 +38,15 @@ $ ->
     will pass the callback an error string, a success will pass the callback
     a string with the new VID.
     ###
-    globals.saveVis = (title, desc, succCallback, failCallback) ->
-
+    createVis = (name) ->
       modal = """
-      <div id="loadModal" class="modal fade well">
-        <div class="center">
-          <img src="/assets/spinner.gif" />
-        </div>
-      </div>
-      """
-      ($ 'body').append modal
+              <div id="loadModal" class="modal fade well">
+                <div class="center">
+                  <img src="/assets/spinner.gif" />
+                </div>
+              </div>
+              """
+      ($ '#viscontainer').append modal
       ($ "#loadModal").modal
         backdrop: 'static'
         keyboard: 'false'
@@ -58,19 +58,9 @@ $ ->
 
       savedData = globals.serializeVis()
 
-      # Construct default name
-      sessionNames = for index, ses of data.metadata
-        ses.name
-
-      sessionNames = sessionNames.join ', '
-
-      if sessionNames.length >= 30
-        sessionNames = (sessionNames.slice 0, 27) + '...'
-
-      name = 'Saved Vis - ' + data.projectName
       req = $.ajax
         type: 'POST'
-        url: "/visualizations"
+        url: '/visualizations'
         dataType: 'json'
         data:
           visualization:
@@ -81,46 +71,43 @@ $ ->
             svg: svg
         success: (msg) ->
           ($ "#loadModal").modal('hide')
-          helpers.name_popup msg, "Visualization", "visualization"
+          window.location = msg.url
         error: (jqxhr, status, msg) ->
-          ($ '#ajax-status').html "error saving visualization: #{ Number data.projectID }"
+          err = "Error saving visualization: #{Number(data.projectID)}"
+          ($ '#ajax-status').html err
+
           response = $.parseJSON msg['responseText']
           error_message = response.errors.join "</p><p>"
 
           ($ '.container.mainContent').find('p').before """
-            <div class="alert alert-danger fade in">
-              <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-              <h4>Error Saving Visualization:</h4>
-              <p>#{error_message}</p>
-              <p>
-                <button type="button" class="btn btn-danger error_bind" data-retry-text"Retrying...">Retry</button>
-                <button type="button" class="btn btn-default error_dismiss">Or Dismiss</button>
-              </p>
-            </div>"""
+          <div class="alert alert-danger fade in">
+            <button type="button" class="close" data-dismiss="alert"
+              aria-hidden="true">×</button>
+            <h4>Error Saving Visualization:</h4>
+            <p>#{error_message}</p>
+            <p>
+              <button type="button" class="btn btn-danger error_bind"
+                data-retry-text"Retrying...">Retry</button>
+              <button type="button" class="btn btn-default error_dismiss">
+                Or Dismiss</button>
+            </p>
+          </div>"""
 
+          # Dismiss
           ($ '.error_dismiss').click ->
             ($ '.alert').alert 'close'
 
+          # Retry
           ($ '.error_bind').click ->
-            req = $.ajax
-              type: 'POST'
-              url: "/visualizations"
-              dataType: 'json'
-              data:
-                visualization:
-                  project_id: Number data.projectID
-                  title: name
-                  data: savedData.data
-                  globals: savedData.globals
-                  svg: svg
-              success: (msg) ->
-                ($ "#loadModal").modal('hide')
-                helpers.name_popup msg, "Visualization", "visualization"
-                ($ '.alert').alert 'close'
+            createVis(name)
 
-              error: (msg) ->
-                ($ '.error_bind').button 'reset'
-
+    ###
+    Creates a new vis upon name submission
+    ###
+    globals.saveVis = (title, desc, succCallback, failCallback) ->
+      name = 'Saved Vis - ' + data.projectName
+      helpers.name_popup(name, 'visualization', '#viscontainer',
+        createVis, null)
 
     ###
     Ajax call to check if the user is logged in. Calls the appropriate
@@ -150,6 +137,11 @@ $ ->
       current = (globals.curVis.canvas.match /([A-z]*)_canvas/)[1]
       current = current[0].toUpperCase() + current.slice 1
       data.defaultVis = current
+
+      # Set fieldSelection if curVis has radio button for y-axis
+      # This ensures that @configs.display defaults correctly
+      if globals.curVis.configs.displayField
+        globals.configs.fieldSelection = [globals.curVis.configs.displayField]
 
       # Check for and note LT dates
       if data.timeType is data.NORM_TIME

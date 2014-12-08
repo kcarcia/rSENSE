@@ -137,7 +137,7 @@ $ ->
     All included datapoints must pass the given filter (defaults to all datapoints).
     ###
     data.getMax = (fieldIndex, groupIndices) ->
-      if typeof groupIndices is 'number' then groupIndices = [ groupIndices ]
+      if typeof groupIndices is 'number' then groupIndices = [groupIndices]
       rawData = @multiGroupSelector(fieldIndex, groupIndices)
 
       if rawData.length > 0
@@ -151,7 +151,7 @@ $ ->
     All included datapoints must pass the given filter (defaults to all datapoints).
     ###
     data.getMin = (fieldIndex, groupIndices) ->
-      if typeof groupIndices is 'number' then groupIndices = [ groupIndices ]
+      if typeof groupIndices is 'number' then groupIndices = [groupIndices]
       rawData = @multiGroupSelector(fieldIndex, groupIndices)
 
       if rawData.length > 0
@@ -165,7 +165,7 @@ $ ->
     All included datapoints must pass the given filter (defaults to all datapoints).
     ###
     data.getMean = (fieldIndex, groupIndices) ->
-      if typeof groupIndices is 'number' then groupIndices = [ groupIndices ]
+      if typeof groupIndices is 'number' then groupIndices = [groupIndices]
       rawData = @multiGroupSelector(fieldIndex, groupIndices)
 
       if rawData.length > 0
@@ -179,10 +179,11 @@ $ ->
     All included datapoints must pass the given filter (defaults to all datapoints).
     ###
     data.getMedian = (fieldIndex, groupIndices) ->
-      if typeof groupIndices is 'number' then groupIndices = [ groupIndices ]
+      if typeof groupIndices is 'number' then groupIndices = [groupIndices]
       rawData = @multiGroupSelector(fieldIndex, groupIndices)
-      rawData.sort()
-
+      rawData = rawData.sort (a, b) ->
+        if a < b then -1 else 1
+      console.log rawData
       mid = Math.floor (rawData.length / 2)
 
       if rawData.length > 0
@@ -198,7 +199,7 @@ $ ->
     All included datapoints must pass the given filter (defaults to all datapoints).
     ###
     data.getCount = (fieldIndex, groupIndices) ->
-      if typeof groupIndices is 'number' then groupIndices = [ groupIndices ]
+      if typeof groupIndices is 'number' then groupIndices = [groupIndices]
       dataCount = @multiGroupSelector(fieldIndex, groupIndices).length
 
       return dataCount
@@ -208,7 +209,7 @@ $ ->
     All included datapoints must pass the given filter (defaults to all datapoints).
     ###
     data.getTotal = (fieldIndex, groupIndices) ->
-      if typeof groupIndices is 'number' then groupIndices = [ groupIndices ]
+      if typeof groupIndices is 'number' then groupIndices = [groupIndices]
       rawData = @multiGroupSelector(fieldIndex, groupIndices)
 
       if rawData.length > 0
