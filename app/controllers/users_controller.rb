@@ -115,6 +115,10 @@ class UsersController < ApplicationController
   # GET /users/new.json
   def new
     @user = User.new
+    @user.known_captcha = session[:captcha]
+    @user.captcha = params[:captcha]
+    @user.save
+    reset_captcha
   end
 
   # GET /users/1/edit

@@ -40,6 +40,10 @@
             <%= ff.password_field :password_confirmation, class: "form-control", placeholder: "Retype your password." %>
           </div>
         </div>
+        
+        <img src="/images/captchas/<%= session[:captcha] %>.jpg" />
+		<%= text_field_tag(:captcha) %>
+		
         <div class="panel-footer">
           <%= ff.submit("Create User", class: "btn btn-primary") %>
           <div class="pull-right"><a href="#" onclick="$('#privacy_policy').toggle()">Privacy Policy</a></div>

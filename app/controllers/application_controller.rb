@@ -1,4 +1,6 @@
 class ApplicationController < ActionController::Base
+  acts_as_captcha
+  
   protect_from_forgery
 
   before_filter :find_user

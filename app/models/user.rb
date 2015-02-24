@@ -3,6 +3,8 @@ require 'nokogiri'
 class User < ActiveRecord::Base
   include ActionView::Helpers::SanitizeHelper
 
+  acts_as_captcha :base => "base error when captcha fails", :field => "field error when captcha fails"
+  
   validates_uniqueness_of :email, case_sensitive: false
   validates :name, length: { minimum: 4, maximum: 70 }, format: {
     with: /\A[\p{Alpha}\p{Blank}\-\'\.]*\z/,
